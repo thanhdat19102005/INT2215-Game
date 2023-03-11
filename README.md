@@ -1,2 +1,2 @@
 # INT2215-Game
-This is my first game in this Semester
+This is my first game in this Semester and being completed
