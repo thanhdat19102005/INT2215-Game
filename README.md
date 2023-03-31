@@ -1,3 +1,3 @@
 # INT2215-Game 
-# Road To Peace
+# BATTLE OF CHESS
 This is my first game in this Semester and being completed
