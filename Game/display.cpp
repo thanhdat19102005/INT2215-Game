@@ -82,3 +82,34 @@ bool Display::loadMedia(){
     return success;
 
 }
+
+
+void Display::close_SDL() {
+	
+	// spriteSheetTexture.free();
+	// buttonTexture.free();
+	// titleTexture.free();
+	// titleTextTexture.free();
+
+	Mix_FreeChunk(mFSound);
+	Mix_FreeChunk(mTSound);
+	mFSound = NULL;
+	mTSound = NULL;
+
+	TTF_CloseFont(Garamond26);
+	TTF_CloseFont(Garamond28);
+	TTF_CloseFont(Cicero22);
+	TTF_CloseFont(Cicero26);
+	Garamond26 = NULL;
+	Garamond28 = NULL;
+	Cicero22 = NULL;
+	Cicero26 = NULL;
+
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(Window);
+	Window = NULL;
+	renderer = NULL;
+
+	Mix_Quit();
+	TTF_Quit();
+}

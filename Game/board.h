@@ -32,6 +32,10 @@ class Board {
         void restart();
         void updateDisplay(const int& mF, const int& mT);
 
+        Display display;
+
+    private:
+        int board120[120];
 
 };
 

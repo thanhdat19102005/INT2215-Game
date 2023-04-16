@@ -40,7 +40,7 @@ class Display {
         TTF_Font* Garamond26, *Garamond28, *Cicero22, *Cicero26;
         Mix_Chunk* mTSound, *mFSound;
         SDL_Rect spriteClip[12], buttonClip[6], titleTextClip[28];
-        //Button button[26];
+        Button button[26];
         //LTexture spriteSheetTexture, buttonTexture, titleTexture, titleTextTexture, turnText, checkText, moveText, rankText, fileText;
         SDL_Color textColor;
         string rankStr, fileStr;
