@@ -135,8 +135,29 @@ class Board {
             flipped = 1 - flipped;
         };
 
+        //legal.cpp
+        bool legalMove(int mF, int mT, bool s, bool v = false);
+        bool putSelfInCheck(int mF, int mT, bool s);
+        bool validateMove(int mF, int mT, bool s);
+        bool validatePawnMove(int mF, int mT, bool s) const;
+        bool validateHozMove(int mF, int mT) const;
+        bool validateDiagMove(int mF, int mT) const;
+        bool validateKnightMove(int mF, int mT) const;
+        bool validateKingMove(int mF, int mT, bool s);
+        bool checkCheck(bool s);
+        bool checkCheck(bool s, std::vector<int>& moveList);
+        bool inCheck(bool s) const;
+        bool canCastle(int dir, bool s);
+        int drawCheck() const;
+
         int& operator[](const int index) const;
         const int& operator[](const int index) const;
+
+        //move.cpp
+        void movePiece();
+        void movePiece(int mF, int mT);
+        void unmovePiece();
+        void unmovePiece(int mF, int mT);
 
         Piece piece[32];
 

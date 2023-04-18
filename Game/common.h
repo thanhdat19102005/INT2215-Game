@@ -9,7 +9,7 @@ using namespace std;
 
 typedef unsigned long long int64;
 
-extern bool quit, start;
+extern bool quit, start, muted;
 
 inline int to64(int number){
 
@@ -73,6 +73,14 @@ enum pieceValue_t{
 
 enum castleside_t { 
     QUEENSIDE = 2, KINGSIDE = 1
+};
+
+enum scores_t { 
+    CHECKMATE_VAL = 9999, STALEMATE_VAL = 8000, MATING_VAL = 9000
+};
+
+enum type_t { 
+    ROOK = 0, KNIGHT, BISHOP, QUEEN, KING, PAWN
 };
 
 enum dir8_t { 
