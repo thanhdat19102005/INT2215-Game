@@ -2,7 +2,7 @@
 # BATTLE OF CHESS
 This is my first game in this Semester and being completed
 
-Conferences :
+References :
 
 * https://www.chessprogramming.org/Main_Page
 
