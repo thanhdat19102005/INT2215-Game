@@ -7,8 +7,17 @@
 #include <vector>
 #include "bitboard.h"
 #include "display.h"
+#include "piece.h"
 
 using namespace std;
+
+struct info {
+	int pmSq;
+	int epSq;
+	int pieceMoved;
+	int prevOnMoveTo;
+	int halfMoveClock;
+};
 
 class Board {
 
@@ -129,6 +138,8 @@ class Board {
         int& operator[](const int index) const;
         const int& operator[](const int index) const;
 
+        Piece piece[32];
+
         Display display;
 
     private:
@@ -139,6 +150,9 @@ class Board {
         bool side, whiteCastled, blackCastled;
         bool flipped, whiteIsBot, blackIsBot;
         
+        std::vector<int> whiteMoveList, blackMoveList;
+        std::vector<int> movesMade;
+        std::vector<int> moveInfo;
         Bitboards bb;
 };
 

@@ -37,7 +37,7 @@ class Piece {
         int getType() const{
             return type;
         };
-        bool getPrômted() const{
+        bool getPromoted() const{
             return promoted;
         };
         void setInMoveList(int i, int v);

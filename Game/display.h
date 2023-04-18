@@ -8,6 +8,7 @@
 #include <string>
 #include "button.h"
 #include "ltexture.h"
+#include "square.h"
 
 using namespace std;
 
@@ -33,9 +34,24 @@ class Display {
         void close_SDL();
         SDL_Texture* loadTexture(string path);
 
+        int getBoardXStart(){
+            return BXSTART;
+        };
+        int getBoardYStart(){
+            return BYSTART;
+        };
+        int getSqSize() {
+            return SQ_SIZE;
+        };
+        int getBoardSize(){
+            return B_SIZE;
+        };
+
+        Square squares[64];
+
     private:
         Board* boardPtr;
-        const static int B_SIZE = 600, SQ_SIZE = 75, BXSTART = 50, BY_START = 50;
+        const static int B_SIZE = 600, SQ_SIZE = 75, BXSTART = 50, BYSTART = 50;
         const static int SCREEN_W = 1250;
 		const static int SCREEN_H = 700;
 

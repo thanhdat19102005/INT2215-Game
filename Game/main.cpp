@@ -7,7 +7,7 @@
 
 using namespace std;
 
-bool quit = false, start = false;
+bool quit = false, start = false, muted = true;
 
 int main(int argc, char* args[]){
     
