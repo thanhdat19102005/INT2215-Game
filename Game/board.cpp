@@ -193,7 +193,7 @@ void Board::initializePiece(){
     }
 }
 
-void Board::placePieces(std::string FEN){
+void Board::placePieces(string FEN){
 
     unsigned int index = 0, sqCounter = A8, p;
     int wPIndex = wPa, bPIndex = bPa;
@@ -358,6 +358,181 @@ void Board::handleInput(int& mF, int& mT, SDL_Event* e){
     if (mF != -1 && mT != -1){
         mF = from64(mF);
         mT = from64(mT);
-        if (legalMove())
+        if (legalMove(mF, mT, getSide(), 1)){
+            setMove(mF, mT);
+            movePiece();
+            changeTurn();
+            genOrderMoveList();
+            checkCheck(getSide());
+            
+        }
+        mT = -1;
+        mF = -1;
     }
 }
+
+void Board::changeTurn(){
+    if (side)
+        side = BLACK;
+    else side = WHITE;
+}
+
+void Board::undoMove(){
+    if (!movesMade.size())
+        return;
+
+    if (movesMade.back() == 0){
+        movesMade.pop_back();
+        moveInfo.pop_back();
+        --ply;
+        changeTurn();
+        checkCheck(side);
+        return;
+    }
+
+    changeTurn();
+    unmovePiece();
+    genOrderedMoveList();
+    checkCheck(side);
+
+    moveFrom = movesMade.back() / 100;
+    moveTo = movesMade.back() % 100;
+
+}
+
+void Board::restart(){
+
+    if (!start)
+        return;
+
+    if (ply == (int)movesMade.size()){
+        while (movesMade.size())
+            undoMove();
+        start = false;
+        sdt::cout << "Restarted game\n";
+    }
+    else {
+        while(movesMade.size())
+            undoMove();
+        moveTo = 0;moveFrom = 0;
+        cout << "Reloaded FEN\n";
+    }
+
+}
+
+string Board::getFen(){
+
+    string FEN;
+    int emptyCount = 0;
+
+    for (int j = 0;j < 8;++j){
+        emptyCount = 0;
+        for (int i = A8 - j * 10;i <= H8 - j * 10;++i){
+            if (board120[i] == none)
+                ++emptyCount;
+            else {
+                if (emptyCount > 0){
+                    FEN += to_string(emptyCount);
+                    emptyCount = 0;
+                }
+                FEN += piece[board120[i]].getAbbr();
+            }
+        }
+        if (emptyCount > 0){
+            FEN += to_string(emptyCount);
+            emptyCount = 0;
+        }
+        if (j != 7)
+            FEN += '/';
+    }
+
+    if (side)
+        FEN += "w";
+    else FEN += "b";
+
+    if (piece[wK].getMoved() == 0){
+
+        if (piece[wkR].getMoved() == 0)
+            FEN += 'K';
+        if (piece[wqR].getMoved() == 0)
+            FEN += 'Q';
+    }
+    if (piece[bK].getMoved() == 0){
+        if (piece[bkR].getMoved() == 0)
+            FEN += 'k';
+        if (piece[bqR].getMoved() == 0)
+            FEN += 'q';
+    }
+
+    if (FEN.back() == ' ')
+        FEN += '-';
+
+    if (moveInfo.size() && moveInfo.back().epSq != 0)
+        FEN += " " + intToSquare(moveInfo.back().epSq) + " ";
+    else FEN += "-";
+
+    if (!moveInfo.size())
+        FEN += "0";
+    else FEN += to_string(moveInfo.back().halfMoveClock);
+
+    FEN += " " + to_string(ply / 2 + 1);
+
+    return FEN;
+}
+
+int Board::getFromMoveList(bool s, int i) const{
+
+    if (s) 
+        return whiteMoveList[i];
+    else return blackMoveList[i];
+    
+}
+
+int Board::getMoveListSize(bool s) const{
+    if (s)
+        return int(whiteMoveList.size());
+    else return int(blackMoveList.size());
+}
+
+int Board::getEpSq(int i) const{
+    //
+    return moveInfo[i].epSq;
+}
+
+int Board::getPmSq(int i) const{
+    return moveInfo[i].pmSq;
+}
+
+int Board::getMoveMade(int i) const{
+
+    return movesMade[i];
+}
+
+int Board::getNumMovesmade() const{
+    return int(movesMade.size());
+}
+
+int Board::getLastMove() const{
+
+    if (movesMade.size())
+        return MovesMade.back();
+    
+    return 0;
+}
+
+void Board::addToMoveList(bool s, int v){
+
+    if (s)
+        whiteMoveList.push_back(v);
+    else blackMoveList.push_back(v);
+}
+
+void Board::clearMoveList(bool s){
+
+    if (s)
+        whiteMoveList.clear();
+    else blackMoveList.clear();
+
+}
+
+

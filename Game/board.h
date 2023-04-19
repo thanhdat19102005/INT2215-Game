@@ -159,6 +159,39 @@ class Board {
         void unmovePiece();
         void unmovePiece(int mF, int mT);
 
+        void generateCaptures(bool s, std::vector<int>& moveList);
+        void generateCapturePieceMoveLists(bool s);
+        void generateCapturePieceMoveListFor(int p);
+        void generateHozCaptures(int p, int& counter);
+        void generateDiagCaptures(int p, int& counter);
+        void generateKnightCaptures(int p, int& counter);
+        void generateKingCaptures(int p, int& counter);
+        void generatePawnCaptures(int p, int& counter);
+        int getNonOrderedAllLegalMoves(bool s, std::vector<int>& moveList);
+		void genOrderedMoveList();
+		void genOrderedMoveList(bool s, std::vector<int>& moveList);
+		void genNonOrderedMoveList(bool s, std::vector<int>& moveList);
+		void generatePieceMoveLists(bool s);
+		void generatePieceMoveListFor(int p);
+		void generateHozMoves(int p, int& counter);
+		void generateDiagMoves(int p, int& counter);
+		void generateKnightMoves(int p, int& counter);
+		void generateKingMoves(int p, int& counter);
+		void generatePawnMoves(int p, int& counter);
+		void addPromotions(bool s, std::vector<int>& moveList);
+
+        //movegen.cpp
+        int perft(int depth);
+		void getCaptures(bool s, std::vector<int>& moveList);
+		void sortCaptures(std::vector<int>& moveList);
+		void sortNonCaptures(std::vector<int>& moveList);
+		void getNonCaptures(bool s, std::vector<int>& moveList);
+		void removeNonCaptures(bool s, std::vector<int>& moveList);
+		void cleanMoveList(bool s);
+		void cleanMoveList(bool s, std::vector<int>& moveList);
+		void clearMovelist(std::vector<int>& moveList);
+
+
         Piece piece[32];
 
         Display display;
