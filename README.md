@@ -9,3 +9,4 @@ References :
 * https://www.chessprogramming.org/General_Setwise_Operations#Intersection
 
 * https://www.chessprogramming.org/BitScan
+* https://www.chessprogramming.org/Dictionary
