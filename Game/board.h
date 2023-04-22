@@ -8,6 +8,8 @@
 #include "bitboard.h"
 #include "display.h"
 #include "piece.h"
+#include "zobrist.h"
+#include "bot.h"
 
 using namespace std;
 
@@ -194,6 +196,10 @@ class Board {
 
         Piece piece[32];
 
+        int eval(bool verbose = false);
+
+        Bot whiteBot, blackBot;
+
         Display display;
 
     private:
@@ -203,11 +209,13 @@ class Board {
         int sideInCheck, sideInCheckmate;
         bool side, whiteCastled, blackCastled;
         bool flipped, whiteIsBot, blackIsBot;
-        
+        int whiteBotLevel, blackBotLevel;
+
         std::vector<int> whiteMoveList, blackMoveList;
         std::vector<int> movesMade;
         std::vector<int> moveInfo;
         Bitboards bb;
+        Zobrist zobrist;
 };
 
 #endif
