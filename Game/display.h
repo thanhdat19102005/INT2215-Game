@@ -27,7 +27,11 @@ class Display {
         void updateText();
         void drawButtons();
         void handleButtons(SDL_EVent* e);
-
+        void drawSquares(const int& mF = -1, const int& mT = -1);
+        void drawPieces(const int& mF = -1, const int& mT = -1);
+        void drawBorder();
+        void drawMoveTable();
+        void drawTitleScreen();
 
         bool init_SDL();
         bool loadMedia();
@@ -51,9 +55,12 @@ class Display {
 
     private:
         Board* boardPtr;
+        bool sideFlag;
         const static int B_SIZE = 600, SQ_SIZE = 75, BXSTART = 50, BYSTART = 50;
         const static int SCREEN_W = 1250;
 		const static int SCREEN_H = 700;
+        int frameCounter;
+        const static int FRAME_REFRESH_RATE = 8;
 
         SDL_Window* Window;
         SDL_Renderer* renderer;
