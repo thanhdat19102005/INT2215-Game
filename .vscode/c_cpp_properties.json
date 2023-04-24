@@ -1,18 +1,20 @@
 {
     "configurations": [
         {
-            "name": "windows-gcc-x64",
+            "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/NEN/SDL2-devel-2.26.3-mingw/SDL2-2.26.3/x86_64-w64-mingw32/include/SDL2"
+                "C:/NEN/SDL2-devel-2.26.3-mingw/SDL2-2.26.3/x86_64-w64-mingw32/include"
             ],
-            "compilerPath": "C:/NEN/MinGW/bin/gcc.exe",
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\NEN\\MinGW\\bin\\gcc.exe",
             "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cppStandard": "gnu++17",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerArgs": [
-                ""
-            ],
             "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],

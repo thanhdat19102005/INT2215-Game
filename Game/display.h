@@ -26,7 +26,7 @@ class Display {
         void displayBotText();
         void updateText();
         void drawButtons();
-        void handleButtons(SDL_EVent* e);
+        void handleButtons(SDL_Event* e);
         void drawSquares(const int& mF = -1, const int& mT = -1);
         void drawPieces(const int& mF = -1, const int& mT = -1);
         void drawBorder();

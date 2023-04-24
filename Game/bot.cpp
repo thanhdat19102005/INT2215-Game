@@ -177,7 +177,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
                 int score2 = hashEntry.bestMoveAndScore % 10000;
                 line.count = 0;
                 pline->move[0] = hashMF * 100 + hashMT;
-                memcpy(pline->move + 1, line.move, linve.count * sizeof(int));
+                memcpy(pline->move + 1, line.move, line.count * sizeof(int));
                 pline->count = line.count + 1;
 
                 if (score2 >= beta)
@@ -198,7 +198,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
             else if (hashEntry.depthAndNodeType % 10 == 2){
                 int score2 = hashEntry.bestMoveAndScore % 10000;
 
-                if (score <= alpha)
+                if (score2 <= alpha)
                     return score2;
             }
 
@@ -517,10 +517,10 @@ void Bot::storeTTEntry(Board& b, int move, int depthLeft, int score, int nodeTyp
         storage.zKey = zobrist;
         storage.bestMoveAndScore = move * 10000 + abs(score);
         storage.depthAndNodeType = depthLeft * 10 + nodeType;
-        transTable[int(zobrist % size)] = storage;
+        transTable[int(zobrist % TTSIZE)] = storage;
     }
 }
 
-HASHENTRY Bot::getTTEntry(unsiged long long key){
+HASHENTRY Bot::getTTEntry(unsigned long long key){
     return transTable[int(key % TTSIZE)];
 }

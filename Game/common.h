@@ -2,6 +2,8 @@
 #define COMMON_H
 
 #include <assert.h>
+#include <string>
+#include <cstdlib>
 
 using namespace std;
 

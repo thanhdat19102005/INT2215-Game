@@ -16,15 +16,18 @@ void Board::movePiece(int mF, int mT){
 
     if (!moveInfo.size())
         localHalfMoveClock = 0;
-    else localHalfMoveClock = moveInfo.back().halffMoveClock + 1;
+    else localHalfMoveClock = moveInfo.back().halfMoveClock + 1;
 
-    moveSMade.push_back(mF * 100 + mT);
+    movesMade.push_back(mF * 100 + mT);
+    
+    if (mFVal == K_VAL && abs(mF - mT) == 2)
+        if (mF < mT)   
+            castling = KINGSIDE;
+        else castling = QUEENSIDE;
     
     if (!castling){
-        if (mFVal == K_VAl && abs(mF - mT) == 2)
-            if (mF < mT)   
-                castling = KINGSIDE;
-            else castling = QUEENSIDE;
+        
+        zobrist.key ^= zobrist.piece[type][s][to64(mF) - 1];
         
         if (mFVal == P_VAL){
 
@@ -38,10 +41,28 @@ void Board::movePiece(int mF, int mT){
                 if (s)
                     localEpSq = mF + 10;
                 else localEpSq = mF - 10;
+
+                zobrist.key  ^= zobrist.enPassant[mF % 10 - 1];
             }
+            localHalfMoveClock = 0;
         }
         else if (mFVal == R_VAL && piece[board120[mF]].getMoved() == 0){
+                
+            int king;
+            if (s)
+                king = wK;
+            else king = bK;
 
+            if (piece[king].getAlive() && piece[king].getMoved() == 0) {
+				
+				if (king - board120[mF] > 0) {
+					zobrist.key ^= zobrist.castling[s][1];
+				}
+	
+				else {
+					zobrist.key ^= zobrist.castling[s][0];
+				}
+			}
         }
         else if (mFVal == K_VAL && piece[board120[mF]].getMoved() == 0){
             int kRook, qRook;
@@ -51,9 +72,19 @@ void Board::movePiece(int mF, int mT){
             if (s)
                 qRook = wqR;
             else qRook = bqR;
+
+            if (piece[kRook].getAlive() && piece[kRook].getMoved() == 0) {
+				zobrist.key ^= zobrist.castling[s][0];
+			}
+			
+			if (piece[qRook].getAlive() && piece[qRook].getMoved() == 0) {
+				zobrist.key ^= zobrist.castling[s][1];
+			}
         }
 
         if (mFVal == P_VAL && ((s && mT / 10 == 9) || (!s && mT / 10 == 2))){
+            
+            zobrist.key ^= zobrist.piece[3][s][to64(mT) - 1];
             bb.pieces[s][QUEEN] |= bb.sq[to64(mT) - 1];
             bb.allPieces[s] |= bb.sq[to64(mT) - 1];
 
@@ -81,6 +112,11 @@ void Board::movePiece(int mF, int mT){
                 piece[board120[mF]].setInMoveList(i , 0);
             
         }
+        else {
+			zobrist.key ^= zobrist.piece[type][s][to64(mT) - 1];
+			bb.pieces[s][piece[board120[mF]].getType()] |= bb.sq[to64(mT) - 1];
+			bb.allPieces[s] |= bb.sq[to64(mT) - 1];
+		}
 
         if (board120[mT + epExtra] != -1){
             if (!s)
@@ -93,6 +129,16 @@ void Board::movePiece(int mF, int mT){
             if (s)
                 eKing = bK;
             else eKing = wK;
+
+            if (piece[eKing].getAlive() && piece[eKing].getMoved() == 0){
+                int eRook = board120[mT + epExtra];
+                if (piece[eRook].getAlive() && piece[eRook].getMoved() == 0){
+
+                    if ((eKing - eRook) > 0)
+                        zobrist.key ^= zobrist.castling[!s][1];
+                    else zobrist.key ^= zobrist.castling[!s][0];
+                }
+            }
 
         }
         else if (piece[board120[mT + epExtra]].getValue() == K_VAL){
@@ -108,9 +154,19 @@ void Board::movePiece(int mF, int mT){
             if (s)
                 ekRook = bkR;
             else ekRook = wqR;
+
+            if (piece[eKing].getMoved() == 0) {
+	
+					if (piece[ekRook].getAlive() && piece[ekRook].getMoved() == 0) {
+						zobrist.key ^= zobrist.castling[!s][0];
+					}
+					if (piece[eqRook].getAlive() && piece[eqRook].getMoved() == 0) {
+						zobrist.key ^= zobrist.castling[!s][1];
+					}
+				}
             
         }
-
+        zobrist.key ^= zobrist.piece[piece[board120[mT+epExtra]].getType()][!s][to64(mT + epExtra) - 1];
         bb.pieces[!s][piece[board120[mT + epExtra]].getType()] &= ~bb.sq[to64(mT + epExtra) - 1];
         bb.allPieces[!s] &= ~bb.sq[to64(mT + epExtra) - 1];
         piece[board120[mT + epExtra]].kill();
@@ -139,12 +195,46 @@ void Board::movePiece(int mF, int mT){
         if (castling == KINGSIDE){
             cExtra[0] = 1;
             cExtra[1] = 3;
+
+            zobrist.key ^= zobrist.castling[s][0];
+			if (s) {
+				if (piece[wqR].getAlive() &&
+				    piece[wqR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[WHITE][1];
+				}
+			}
+			else {
+				if (piece[bqR].getAlive() &&
+				    piece[bqR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[BLACK][1];
+				}
+			}
+
         }
         else{
             cExtra[0] = -1;
             cExtra[1] = -4;
             
+            zobrist.key ^= zobrist.castling[s][1];
+			if (s) {
+				if (piece[wkR].getAlive() &&
+				    piece[wkR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[WHITE][0];
+				}
+			}
+			else {
+				if (piece[bkR].getAlive() &&
+				    piece[bkR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[BLACK][0];
+				}
+			}
+
         }
+
+        zobrist.key ^= zobrist.piece[KING][s][to64(mF)-1];	      
+		zobrist.key ^= zobrist.piece[KING][s][to64(mT)-1]; 	      
+		zobrist.key ^= zobrist.piece[ROOK][s][to64(mF+cExtras[1])-1]; 
+		zobrist.key ^= zobrist.piece[ROOK][s][to64(mF+cExtras[0])-1]; 
 
         board120[mT] = board120[mF];
         piece[board120[mT]].setPos(mT);
@@ -168,7 +258,8 @@ void Board::movePiece(int mF, int mT){
         castling = 0;
         localHalfMoveClock = 0;
     }
-
+    
+    zobrist.key ^= zobrist.side;
     //add Hashing
     moveInfo.push_back({localPmSq, localEpSq, board120[mT], localPrevOnMoveTo, localHalfMoveClock});
     ++ply;
@@ -187,10 +278,19 @@ void Board::unmovePiece(int mF, int mT) {
 	int type = piece[board120[mT]].getType();
 	int mTVal = piece[board120[mT]].getValue();
 
+    if (moveInfo.back().epSq != 0) {
+		zobrist.key ^= zobrist.enPassant[moveInfo.back().epSq%10-1];
+	}
+
+	if (moveInfo.size() > 1 && moveInfo[moveInfo.size()-2].epSq != 0) {
+		zobrist.key ^= zobrist.enPassant[moveInfo[moveInfo.size()-2].epSq%10-1];
+	}
+
+
 	if (mTVal == K_VAL && abs(mF-mT) == 2){
         if (mF < mT)
             castling = KINGSIDE;
-        else castling = QUEENSIZE;
+        else castling = QUEENSIDE;
     }
 	
 	if (!castling) {
@@ -206,10 +306,12 @@ void Board::unmovePiece(int mF, int mT) {
 		}
 		
 		if (mT == moveInfo.back().pmSq) {
-			
+            
+            zobrist.key ^= zobrist.piece[type][s][to64(mT)-1];
 			bb.pieces[s][QUEEN] &= ~bb.sq[to64(mT)-1];
 			bb.allPieces[s] &= ~bb.sq[to64(mT)-1];
 			
+            zobrist.key ^= zobrist.piece[5][s][to64(mF)-1];
 			bb.pieces[s][PAWN] |= bb.sq[to64(mF)-1];
 			bb.allPieces[s] |= bb.sq[to64(mF)-1];
 
@@ -233,6 +335,8 @@ void Board::unmovePiece(int mF, int mT) {
 		}	
 		else { 
 			
+            zobrist.key ^= zobrist.piece[type][s][to64(mT)-1];
+			zobrist.key ^= zobrist.piece[type][s][to64(mF)-1];
 			bb.pieces[s][piece[board120[mT]].getType()] &= ~bb.sq[to64(mT) - 1];
 			bb.pieces[s][piece[board120[mT]].getType()] |= bb.sq[to64(mF) - 1];
 			bb.allPieces[s] &= ~bb.sq[to64(mT) - 1];
@@ -246,6 +350,15 @@ void Board::unmovePiece(int mF, int mT) {
                 king = wK;
             else king = bK;
 
+            if (piece[king].getAlive() && piece[king].getMoved() == 0) {
+				if ((king - board120[mT]) > 0) {
+					zobrist.key ^= zobrist.castling[s][1];
+				}
+				else {
+					zobrist.key ^= zobrist.castling[s][0];
+				}
+			}
+
 		}
 		
 		else if (mTVal == K_VAL && piece[board120[mT]].getMoved() == 1) {
@@ -254,6 +367,12 @@ void Board::unmovePiece(int mF, int mT) {
             if (s)
                 kRook = wkR;
             else kRook = bkR;
+            if (piece[kRook].getAlive() && piece[kRook].getMoved() == 0) {
+				zobrist.key ^= zobrist.castling[s][0];
+			}
+			if (piece[qRook].getAlive() && piece[qRook].getMoved() == 0) {
+				zobrist.key ^= zobrist.castling[s][1];
+			}
     
 		}
 		
@@ -280,6 +399,7 @@ void Board::unmovePiece(int mF, int mT) {
 			else
 				blackMaterial += piece[board120[mT + epExtra]].getValue();
 			
+            zobrist.key ^= zobrist.piece[piece[board120[mT+epExtra]].getType()][!s][to64(mT+epExtra)-1];
 			bb.pieces[!s][piece[board120[mT + epExtra]].getType()] |= bb.sq[to64(mT + epExtra)-1];
 			bb.allPieces[!s] |= bb.sq[to64(mT + epExtra)-1];
 
@@ -289,6 +409,14 @@ void Board::unmovePiece(int mF, int mT) {
                 if (s)
                     eKing = bK;
                 else eKing = wK;
+                if (piece[eKing].getAlive() && piece[eKing].getMoved() == 0) {
+					if ((eKing - board120[mT]) > 0) {
+						zobrist.key ^= zobrist.castling[!s][1];
+					}
+					else {
+						zobrist.key ^= zobrist.castling[!s][0];
+					}
+				} 
 			}
 			else if (board120[mT] != none && piece[board120[mT]].getValue() == K_VAL && piece[board120[mT]].getMoved() == 0) {
 
@@ -301,6 +429,13 @@ void Board::unmovePiece(int mF, int mT) {
                     ekRook = wkR;
                     eqRook = wqR;
                 }
+
+                if (piece[ekRook].getAlive() && piece[ekRook].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[!s][0];
+				}
+				if (piece[eqRook].getAlive() && piece[eqRook].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[!s][1];
+				}
 
 			}
 
@@ -317,13 +452,40 @@ void Board::unmovePiece(int mF, int mT) {
 			cExtras[0] = 1; 
 			cExtras[1] = 3; 
 			
+            zobrist.key ^= zobrist.castling[s][0];
+			if (s) {
+				if (piece[wqR].getAlive() && piece[wqR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[WHITE][1];
+				}
+			}
+			else {
+				if (piece[bqR].getAlive() && piece[bqR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[BLACK][1];
+				}
+			}
 		}
 		else {
 			cExtras[0] = -1; 
 			cExtras[1] = -4; 
 			
+            zobrist.key ^= zobrist.castling[s][1];
+			if (s) {
+				if (piece[wkR].getAlive() && piece[wkR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[WHITE][0];
+				}
+			}
+			else {
+				if (piece[bkR].getAlive() && piece[bkR].getMoved() == 0) {
+					zobrist.key ^= zobrist.castling[BLACK][0];
+				}
+			}
 		}
 		
+        zobrist.key ^= zobrist.piece[4][s][to64(mT)-1]; 	   
+		zobrist.key ^= zobrist.piece[4][s][to64(mF)-1]; 	   
+		zobrist.key ^= zobrist.piece[0][s][to64(mF+cExtras[0])-1]; 
+		zobrist.key ^= zobrist.piece[0][s][to64(mF+cExtras[1])-1]; 
+
 		bb.pieces[s][KING] &= ~bb.sq[to64(mT) - 1];
 		bb.pieces[s][KING] |= bb.sq[to64(mF) - 1];
 		bb.allPieces[s] &= ~bb.sq[to64(mT) - 1];
@@ -345,6 +507,7 @@ void Board::unmovePiece(int mF, int mT) {
 		castling = 0;
 	}
 
+    zobrist.key ^= zobrist.side;
 	movesMade.pop_back();
 	moveInfo.pop_back();
 	--ply;

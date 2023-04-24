@@ -35,7 +35,7 @@ bool Board::putSelfInCheck(int mF, int mT, bool s){
     bool isInCheck;
 
     movePiece(mF, mT);
-    isInCheck = incheck(s);
+    isInCheck = inCheck(s);
     unmovePiece(mF, mT);
 
     return isInCheck;    
@@ -100,7 +100,7 @@ bool Board::inCheck(bool s) const{
 
         if (i == NORTH || i ==  NORTHEAST || i == NORTHWEST || i == EAST)
             blockSq = bb.bitScanForward(blockBB);
-        else if (i == SOUTH || i == SOUTHEAST || d == SOUTHWEST || i == WEST)
+        else if (i == SOUTH || i == SOUTHEAST || i == SOUTHWEST || i == WEST)
             blockSq = bb.bitScanReverse(blockBB);
 
         if (bb.sq[blockSq] & bb.allPieces[s])
@@ -181,7 +181,7 @@ bool Board::validatePawnMove(int mF, int mT, bool s) const{
     if ((s && mF > mT) || (!s && mF < mT))
         return false;
     
-    if (diff == 10 && onMT = none)
+    if (diff == 10 && onMT == none)
         return true;
 
     if (diff == 20 && onMT == none){
@@ -307,7 +307,7 @@ bool Board::canCastle(int dir, bool s){
         else r = bqR;
     }
 
-    if (dir === KINGSIDE)
+    if (dir == KINGSIDE)
         c = 1;
     else c = -1;
 
@@ -344,7 +344,15 @@ int Board::drawCheck() const{
     
     int count = 0;
 
-    //for (int )
+    for (int j = lastPly - 3;j >= lastPly - moveInfo.back().halfMoveClock - 1;j -= 2) {
+		if (j < 0) 
+            break;
+		if (moveInfo[lastPly-1].zobrist == moveInfo[j].zobrist) {
+			count++;
+			if (count == 2)
+				return 2;
+		}
+	}
 
     return count;
 }

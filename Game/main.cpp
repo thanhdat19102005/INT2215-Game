@@ -3,7 +3,6 @@
 #include <SDL_image.h>
 #include "common.h"
 #include "board.h"
-#include "display.h"
 
 using namespace std;
 

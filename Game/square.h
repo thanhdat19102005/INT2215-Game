@@ -45,6 +45,6 @@ class Square{
             bool dragging;
             int square, piece;
             SDL_Point pos;
-}
+};
 
 #endif

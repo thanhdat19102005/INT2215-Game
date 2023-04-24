@@ -5,6 +5,7 @@
 
 class Bitboards{
 
+    friend class Board;
     public:
 
         Bitboards();

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <SDL.h>
 #include <SDL_mixer.h>
 #include <string>
 #include "common.h"
@@ -13,6 +12,7 @@ Board::Board() : display(this){
     emptyBoard();
     initializePiece();
     placePieceDefault();
+    initializeZobrist();
     setSquarePosition();
     initiallizeBitboard();
     display.setSpriteClips();
@@ -29,10 +29,72 @@ Board::Board(string FEN){
     display.setSpriteClips();
     display.setButtons();
     placePiece(FEN);
+    initiallizeZobrist();
+    moveInfo[0].zobrist = zobrist.key;
 }
 
 void Board::updateDisplay(const int& mF, const int& mT){
     display.displayBoard(mF, mT);
+}
+
+void Board::initializeZobrist() {
+	bool color;
+	int pos;
+	zobrist.key = 0;
+	for (int p = 0; p < 32; p++) {
+		if (!piece[p].getAlive()) continue;
+		color = piece[p].getColor();
+		pos = to64(piece[p].getPos());
+		switch (piece[p].getValue()) {
+			case R_VAL:
+				zobrist.key ^= zobrist.piece[0][color][pos-1];
+			case N_VAL:
+				zobrist.key ^= zobrist.piece[1][color][pos-1];
+			case B_VAL:
+				zobrist.key ^= zobrist.piece[2][color][pos-1];
+			case Q_VAL:
+				zobrist.key ^= zobrist.piece[3][color][pos-1];
+			case K_VAL:
+				zobrist.key ^= zobrist.piece[4][color][pos-1];
+			case P_VAL:
+				zobrist.key ^= zobrist.piece[5][color][pos-1];
+		}
+	}
+
+	if (!side)
+		zobrist.key ^= zobrist.side;
+
+	if (piece[wK].getMoved() == 0) {
+		if (piece[wkR].getMoved() == 0 && piece[wqR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[1][2];
+		}
+		else if (piece[wkR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[1][0];
+		}
+		else if (piece[wqR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[1][1];
+		}
+	}
+	else 
+		zobrist.key ^= zobrist.castling[1][3];
+
+	if (piece[bK].getMoved() == 0) {
+		if (piece[bkR].getMoved() == 0 && piece[bqR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[0][2];
+		}
+		else if (piece[bkR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[0][0];
+		}
+		else if (piece[bqR].getMoved() == 0) {
+			zobrist.key ^= zobrist.castling[0][1];
+		}
+	}
+	else 
+		zobrist.key ^= zobrist.castling[0][3];
+	
+	
+	if (moveInfo.size() && moveInfo.back().epSq != 0)
+		zobrist.key ^= zobrist.enPassant[to64(moveInfo.back().epSq)%10-1];
 }
 
 void Board::setSquarePosition(){
@@ -364,6 +426,11 @@ void Board::handleInput(int& mF, int& mT, SDL_Event* e){
             changeTurn();
             genOrderMoveList();
             checkCheck(getSide());
+            std::cout << "Current FEN (ply " << ply << ", move " << (ply-1)/2+1 << "): " << getFEN() << '\n';
+			std::cout << "Current Zobrist: " << zobrist.key << '\n';
+			if (drawCheck() == 2)
+				std::cout << "Threefold repetition.\n";
+			std::cout << "-----------------------------------------------------------------------------\n\n";
             
         }
         mT = -1;
@@ -375,6 +442,51 @@ void Board::changeTurn(){
     if (side)
         side = BLACK;
     else side = WHITE;
+}
+
+void Board::botMove() {
+	
+    if (sideInCheckmate)
+		return;
+	std::cout << "Thinking for ";
+	if (side)
+        std::cout << "White...";
+    else std::cout << "Black...";
+
+	std::cout << " (ply " << ply+1 << ", move " << ply/2 + 1 << ")\n";
+
+	display.displayBotText();
+
+	int move = 0;
+	if (side)
+		move = whiteBot.think(*this, whiteBot.getLevel());
+	else
+		move = blackBot.think(*this, blackBot.getLevel());
+
+	if (move == 0) {
+		std::cout << "Stalemate!\n";
+		sideInCheckmate = 3;
+		return;
+	}
+
+	setMove(move / 100, move % 100);
+	movePiece();
+	if (!muted)
+		Mix_PlayChannel(-1, display.mFSound, 0);
+
+	changeTurn();
+	genOrderedMoveList();
+	checkCheck(side);
+	std::cout << "White material: " << whiteMaterial << " Black material: " << blackMaterial << '\n';
+	std::cout << "Current FEN (ply " << ply << ", move " << (ply-1)/2+1 << "): " << getFEN() << '\n';
+	std::cout << "Current Zobrist: " << zobrist.key << '\n';
+	
+    if (drawCheck() == 2) {
+		std::cout << "Threefold repetition.\n";
+		sideInCheckmate = 3;
+	}
+	std::cout << "-----------------------------------------------------------------------------\n\n";
+	
 }
 
 void Board::undoMove(){
@@ -503,6 +615,16 @@ int Board::getPmSq(int i) const{
     return moveInfo[i].pmSq;
 }
 
+int Board::getPrevOnMoveTo(int i) const {
+	assert(i > -1 && i < (int)moveInfo.size());
+	return moveInfo[i].prevOnMoveTo;
+}
+
+int Board::getPieceMoved(int i) const {
+	assert(i > -1 && i < (int)moveInfo.size());
+	return moveInfo[i].pieceMoved;
+}
+
 int Board::getMoveMade(int i) const{
 
     return movesMade[i];
@@ -534,5 +656,16 @@ void Board::clearMoveList(bool s){
     else blackMoveList.clear();
 
 }
+
+const int& Board::operator [](const int index) const {
+	assert(index > -1 && index < 120);
+	return board120[index];
+}
+
+int& Board::operator [](const int index) {
+	assert(index > -1 && index < 120);
+	return board120[index];
+}
+
 
 

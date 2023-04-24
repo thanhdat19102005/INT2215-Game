@@ -1,10 +1,11 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
 #include "button.h"
 #include "board.h"
 #include "display.h"
 #include "common.h"
+#include "ltexture.h"
 
 Button::Button(){
 
