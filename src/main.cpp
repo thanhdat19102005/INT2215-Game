@@ -1,17 +1,21 @@
 #include <iostream>
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+//#include <chrono>
 #include "common.h"
 #include "board.h"
 
+bool quit = false, muted = true, start = false;
+
 using namespace std;
 
-bool quit = false, start = false, muted = true;
+int main(int argc, char* args[]) {
+	int mF = -1, mT = -1;
+	SDL_Event e; 
+	Board board;
 
-int main(int argc, char* args[]){
-    
-    SDL_Event e;
-
+	std::cout << "Current FEN (start): " << board.getFEN() << '\n';
+	std::cout << "Current Zobrist (start): " << board.getZobrist() << '\n';
 
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
@@ -74,6 +78,5 @@ int main(int argc, char* args[]){
 			mF = mT = -1;
 	}
 
-    
-    return 0;
+	return 0;
 }
