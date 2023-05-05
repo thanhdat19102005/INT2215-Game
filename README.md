@@ -10,3 +10,4 @@ References :
 
 * https://www.chessprogramming.org/BitScan
 * https://www.chessprogramming.org/Dictionary
+* https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm
