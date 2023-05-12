@@ -80,7 +80,10 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 - Rèn luyện kĩ năng thiết kế (chia nhỏ, xây dựng module), lập trình, cải tiến và duy trì.
 
 ## 🐧 Các chức năng chính <a name = "primary_function"></a>
-- ![image]()
+
+![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot1.png)
+
+
 
 ## 👨‍💻 Kỹ thuật lập trình <a name = "programming_technique"></a>
 - Lập trình hướng đối tượng (OOP)
@@ -113,3 +116,6 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 * https://www.chessprogramming.org/Dictionary
 * https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming
 * https://arxiv.org/ftp/arxiv/papers/2209/2209.01506.pdf (Neural Networks for Chess)
+
+![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot2.png)
+![]
