@@ -21,6 +21,7 @@
 *  [Các chức năng chính](#primary_funtion)
 *  [Kỹ thuật lập trình](#programming_technique)
 *  [Hướng đi trong tương lai](#future_development)
+*  [Kết luận](#conclusion)
 
 ## 📖 Thuật ngữ<a name = "glossary"></a>
 - Checkmate : Chiếu hết
@@ -122,6 +123,26 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 - Thêm bảng rank của người chơi.
 - Thêm nhiều chế độ như cờ chớp (Bullet Chess), Cờ 3 người (Three-Player Chess) nhằm đa dạng cách chơi hơn, không gây nhàm chán.
 - Thêm nhiều âm thanh bắt tai hơn và hình ảnh đẹp hơn.
+
+## ❤️ Kết luận <a name = "conclusion"></a>
+
+<p style = "font-size: 20px">Việc hoàn thiện project này giúp em mở mang rất nhiều : </p>
+
+- Cách dùng github, git.
+- Hiểu được mô hình phát triển phần mềm kiểu thác nước.
+- Biết chia nhỏ vấn đề, xử lý trên các module.
+- Hiểu được một số khía cạnh của OOP.
+- Hiểu được cách thức hoạt động của Chess Engine và thuật toán AI.
+
+<p style = "font-size: 25px"> A special thanks to:</p>
+
+Cảm ơn tất cả các thầy đã giúp đỡ em trong việc hoàn thiện project này
+
+- <p style = "font-weight: bold">Thầy Trần Quốc Long </p>
+- <p style = "font-weight: bold">Thầy Lê Đức Trọng </p>
+- <p style = "font-weight: bold">Thầy Tạ Việt Cường </p>
+- <p style = "font-weight: bold">Thầy Đỗ Minh Khá </p>
+
 
 📚 References :
 
