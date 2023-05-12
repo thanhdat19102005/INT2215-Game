@@ -69,6 +69,8 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
     + Zobrist hashing
 
     + Transposition tables
+    
+    + FEN string
 
 ## ❓ Vì sao mình lại chọn game này để thể hiện <a name = "why"></a>
 
@@ -83,7 +85,18 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 
 ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot1.png)
 
+- Để bắt đầu trò chơi, ta click nút Start, bên trắng sẽ đi trước.
 
+- Ta có thể chọn chế độ 2 người chơi (Human vs Human) hoặc người chơi với máy (Human vs Computer). Với computer thì có thể lựa chọn level tùy ý : 1 là dễ nhất, 9 là khó nhất.
+
+- Nút ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot6.png) khi click chuột vào đó ta sẽ quay trở lại màn hình chính bàn đầu (restart game).
+
+- Nút ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot7.png) khi click chuột vào đó ta sẽ quay trở lại nước đi trước đó (để đi lại).
+
+- Nút ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot8.png) có chức năng xoay bàn cờ để thay đổi sao cho người chơi có góc nhìn dễ dàng nhất(hình minh họa ở dưới).
+![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot5.png)
+
+- Để di chuyển quân cờ, ta có thể nhấn giữ chuột kéo thả tới ô mong muốn, hoặc click chuột vào quân cờ sau đó ấn vào ô địa chỉ cần tới.
 
 ## 👨‍💻 Kỹ thuật lập trình <a name = "programming_technique"></a>
 - Lập trình hướng đối tượng (OOP)
@@ -118,4 +131,3 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 * https://arxiv.org/ftp/arxiv/papers/2209/2209.01506.pdf (Neural Networks for Chess)
 
 ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot2.png)
-![]
