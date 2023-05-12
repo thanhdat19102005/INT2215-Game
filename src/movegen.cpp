@@ -4,25 +4,25 @@
 #include "display.h"
 #include "board.h"
 
-int Board::perft(int depth) {
-	int n_moves, i;
-	int nodes = 0;
-	std::vector<int> moveList;
+// int Board::perft(int depth) {
+// 	int n_moves, i;
+// 	int nodes = 0;
+// 	std::vector<int> moveList;
 
-	n_moves = getNonOrderedAllLegalMoves(side, moveList);
+// 	n_moves = getNonOrderedAllLegalMoves(side, moveList);
 
-	if (depth == 1) return n_moves;
+// 	if (depth == 1) return n_moves;
 	
-	for (i = 0; i < n_moves; i++) {
-		movePiece(moveList[i]/100, moveList[i]%100);
-		changeTurn();
-		nodes += perft(depth-1);
-		unmovePiece(moveList[i]/100, moveList[i]%100);
-		changeTurn();
-	}
+// 	for (i = 0; i < n_moves; i++) {
+// 		movePiece(moveList[i]/100, moveList[i]%100);
+// 		changeTurn();
+// 		nodes += perft(depth-1);
+// 		unmovePiece(moveList[i]/100, moveList[i]%100);
+// 		changeTurn();
+// 	}
 
-	return nodes;
-}
+// 	return nodes;
+// }
 
 int Board::getNonOrderedAllLegalMoves(bool s, std::vector<int>& moveList) {
 	int startP, endP, mF, mT;

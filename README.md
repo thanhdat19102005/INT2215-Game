@@ -85,9 +85,9 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 
 ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot1.png)
 
-- Để bắt đầu trò chơi, ta click nút Start, bên trắng sẽ đi trước.
-
 - Ta có thể chọn chế độ 2 người chơi (Human vs Human) hoặc người chơi với máy (Human vs Computer). Với computer thì có thể lựa chọn level tùy ý : 1 là dễ nhất, 9 là khó nhất.
+
+- Để bắt đầu trò chơi, ta click nút Start, bên trắng sẽ đi trước.
 
 - Nút ![](https://github.com/ngoctuannguyen/INT2215-Game/blob/main/res/Screenshot6.png) khi click chuột vào đó ta sẽ quay trở lại màn hình chính bàn đầu (restart game).
 
