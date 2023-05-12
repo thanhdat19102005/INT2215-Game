@@ -31,6 +31,7 @@ void Bot::reset() {
 int Bot::think(Board& b, int depth) {
 	using std::vector;
 
+	//Save starting time
 	auto beginTime1 = std::chrono::high_resolution_clock::now();
 	typedef std::chrono::duration<float> fsec;
 
@@ -39,25 +40,31 @@ int Bot::think(Board& b, int depth) {
 	int asp = P_VAL/2;
 	vector<int> moveList;
 
+	//Reset everything if you restart the game
 	if (b.getNumMovesMade() < 2)
 		reset();	
 
+	//Generate legal moveLists
 	b.genOrderedMoveList(b.getSide(), moveList);
 	b.checkCheck(b.getSide(), moveList);
 	
+	//Iterative deepening
 	for (int i = 1; i <= depth; i++) {
 		std::cout << "Search to ply " << i << "...\n";
 
+		//Age HH tables
 		for (int f = 0; f < 64; f++)
 			for (int t = 0; t < 64; t++)
 				hh[f][t] /= 2;
 
 		oldPrinVarLine = prinVarLine;
 
+		//Get start time of this specific search
 		auto beginTime2 = std::chrono::high_resolution_clock::now();
 		nodes = 0;
 		qNodes = 0;
 
+		//Set aspiration window
 		alpha = bestScore - asp;
 		beta = bestScore + asp;
 
@@ -76,12 +83,14 @@ int Bot::think(Board& b, int depth) {
 		}
 
 		bestMoveSoFar = prinVarLine.move[0];
+		
 		std::cout << "TRANSTABLE INFO\n----------\n";
 		std::cout << "actual zobrist: " << b.getZobrist() << '\n';
 		std::cout << "entry at TT zobrist..\nkey: " << transTable[int(b.getZobrist()%TTSIZE)].zKey;
 		std::cout << "\nbestMoveAndScore: " << transTable[int(b.getZobrist()%TTSIZE)].bestMoveAndScore;
 		std::cout << "\ndepthAndNodeType: " << transTable[int(b.getZobrist()%TTSIZE)].depthAndNodeType;
 		std::cout << "\n\n";
+
 
 		auto endTime3 = std::chrono::high_resolution_clock::now();
 		fsec diff3 = endTime3 - beginTime1;
@@ -96,6 +105,7 @@ int Bot::think(Board& b, int depth) {
 		std::cout << "Current score: " << b.eval() << ", best score: " << bestScore << ", move: " << bestMoveSoFar << '\n';;
 		std::cout << "Total time taken: " << diff3.count() << "\n\n";
 
+		//Don't search further if you can see checkmate
 		if (bestScore >= MATING_VAL)
 			break;
 
@@ -122,6 +132,7 @@ int Bot::think(Board& b, int depth) {
 	clearTT();
 
 	return prinVarLine.move[0];
+
 }
 
 int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, LINE* pline, bool allowNull, int ext) {
@@ -134,12 +145,14 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 
 	bool s = b.getSide();
 
+	//If our king is dead, return bad score
 	if ((s && !b.piece[wK].getAlive()) || (!s && !b.piece[bK].getAlive())) {
 		pline->count = 0;
 		storeTTEntry(b, 9999, depthLeft, -CHECKMATE_VAL + depthGone - 1, 0);
 		return -CHECKMATE_VAL + depthGone - 1;
 	}
 
+	//Repetition detection
 	if (allowNull && depthGone) {
 		if (b.drawCheck()) {
 			pline->count = 0;
@@ -149,8 +162,10 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 
 	LINE line;
 
+	//Useful to know this for later	
 	bool inCheck = b.inCheck(s);
 
+	//Transposition table look-up
 
 	HASHENTRY hashEntry = getTTEntry(b.getZobrist());
 
@@ -166,35 +181,36 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			//	std::cout << "hashEntry.bestMoveAndScore: " << hashEntry.bestMoveAndScore << "\n";
 			//	std::cout << "score2: " << score2 << "\n";
 			
+				//Add the move to the principal variation
 				line.count = 0;
 				pline->move[0] = hashMF * 100 + hashMT;
 				memcpy(pline->move + 1, line.move, line.count * sizeof(int));
 				pline->count =  line.count + 1;
 
-				if (score2 >= beta) { 
+				if (score2 >= beta) { //Fail-high
 					return beta;
 				}
-				else if (score2 < alpha) { 
+				else if (score2 < alpha) { //Fail-low
 					return alpha;
 				}
 				return score2;
 			}
-			
+			//Lower bound
 			else if (hashEntry.depthAndNodeType % 10 == 1) {
 				int score2 = hashEntry.bestMoveAndScore % 10000;
 
-				if (score2 >= beta) { 
+				if (score2 >= beta) { //Fail-high
 					return score2;
 				}
 				if (score2 > alpha) {
 					//alpha = score2;
 				}
 			}
-			
+			//Upper bound
 			else if (hashEntry.depthAndNodeType % 10 == 2) {
 				int score2 = hashEntry.bestMoveAndScore % 10000;
 
-				if (score2 <= alpha) { 
+				if (score2 <= alpha) { //Fail-low
 					return score2;
 				}
 				if (score2 < beta) {
@@ -205,25 +221,29 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 	}
 
 
+	//Horizon nodes, quiescence search
 	if (depthLeft <= 0) {
-		
+		//If we're in check, search a little further
 		if (allowNull && b.inCheck(s)) {
 			return alphaBeta(b, alpha, beta, 1, depthGone, pline, 0, 0);
 		}
 
+		//Otherwise, do a quiescence search
 		pline->count = 0;
 		int v = quies(b, alpha, beta, depthGone);
-	
+		
 		return v;
 	}
 
 	int score;
 
+	//Give extensions
 	while (ext >= 100) {
 		depthLeft++;
 		ext -= 100;
 	}
 	
+	//Null move reduction
 	if (allowNull && !inCheck) {
 		if ((s && b.getWhiteMaterial() > ENDGAME_VAL) || (!s && b.getBlackMaterial() > ENDGAME_VAL)) {
 			r = depthLeft > 6 ? 4 : 3;
@@ -232,11 +252,11 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			score = -alphaBeta(b, -beta, -beta+1, depthLeft-r-1, depthGone, pline, 0, 0);
 			b.changeTurn();
 			b.zobristXorSide();
-			if (score >= beta) { 
+			if (score >= beta) { //Fail-high
 				pline->count = 0;
 				return score;
 			}
-			
+			//Extend on nearby checkmates
 			else if (score < -MATING_VAL)
 				ext += 50;
 		}
@@ -249,16 +269,20 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 	b.genOrderedMoveList(s, moveList);
 	b.cleanMoveList(s, moveList);
 	
+	//Evading check extension
 	if (inCheck)
 		ext += 75;
 
+	//No legal moves
 	if (moveList.size() == 0) {
 		pline->count = 0;
+		//If we are in checkmate, return bad score
 		if (inCheck) {
 			storeTTEntry(b, 9999, depthLeft, -CHECKMATE_VAL + depthGone - 1, 0);
 
 			return -CHECKMATE_VAL + depthGone - 1;
 		}
+		//Only favor stalemate if we're losing
 		else {
 			if (b.getWhiteMaterial() >= b.getBlackMaterial()) {
 				int v = s ? -STALEMATE_VAL : STALEMATE_VAL;
@@ -269,8 +293,9 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			}
 		}
 	}
+	//Singular reply
 	else if (moveList.size() == 1) {
-
+		//On a root node, quit early
 		if (depthGone == 0) {
 			pline->move[0] = moveList[0];
 			pline->count = 1;
@@ -280,11 +305,14 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			return -STALEMATE_VAL;
 		}	
 
+		//Otherwise, extend
 		ext += 50;
 	}
+	//Only two replies
 	else if (moveList.size() == 2)
 		ext += 25;
 
+	//Frontier nodes: futility pruning
 	if (depthLeft == 1) {
 		if (!inCheck && !(abs(alpha) > MATING_VAL || abs(beta) > MATING_VAL)) {
 			if (b.eval() + B_VAL < alpha && moveList.size()) {
@@ -293,7 +321,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			}
 		}
 	}
-
+	//Pre-frontier nodes: extended futility pruning
 	else if (depthLeft == 2) {
 		if (!inCheck && !(abs(alpha) > MATING_VAL || abs(beta) > MATING_VAL)) {
 			if (b.eval() + R_VAL < alpha && moveList.size()) {
@@ -301,7 +329,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			}
 		}
 	}
-
+	//Pre-pre-frontier nodes: razoring
 	else if (depthLeft == 3) {
 		if (!inCheck && !(abs(alpha) > MATING_VAL || abs(beta) > MATING_VAL)) {
 			if (b.eval() + Q_VAL < alpha && moveList.size()) {
@@ -310,8 +338,9 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 		}
 	}
 
+	//Put principal variation
 	int temp;
-	if (allowNull) { 
+	if (allowNull) {
 		
 		std::vector<int>::iterator pvIndex2;
 		if (hashEntry.zKey == b.getZobrist()) {
@@ -326,7 +355,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 			}
 		}
 		
-	
+		//then PV in front
 		std::vector<int>::iterator pvIndex;
 		if (depthGone < oldPrinVarLine.count) {
 			int pvmove = oldPrinVarLine.move[depthGone];
@@ -343,6 +372,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 	
 	int movesSearched = 0;
 
+	//Loop through moves
 	for (size_t i = 0; i < moveList.size(); i++) {
 		nodes++;
 
@@ -352,6 +382,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 		b.movePiece();
 		b.changeTurn();
 
+		//Pawn push extensions
 		if (b[mF] != none && b.piece[b[mF]].getValue() == P_VAL) {
 			if (s && (mT/10 == 80 || mT/10 == 90))
 				ext += 50;
@@ -359,6 +390,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 				ext += 50;
 		}
 
+		//If we had an alpha cutoff, do a zero-window search (guessing we were right)
 		if (foundPV) {
 			if (movesSearched >= 4 && b.getPly() > 4 &&
 			    b.getPrevOnMoveTo(b.getNumMovesMade()-1) == none && 
@@ -369,7 +401,7 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 				score = alpha+1;
 			if (score > alpha) {
 				score = -alphaBeta(b, -alpha-1, -alpha, depthLeft-1, depthGone+1, &line, 1, ext-100);
-				if ((score > alpha) && (score < beta)) 
+				if ((score > alpha) && (score < beta)) //If we were wrong
 					score = -alphaBeta(b, -beta, -alpha, depthLeft-1, depthGone+1, &line, 1, ext-100);
 			}
 		}	
@@ -379,23 +411,25 @@ int Bot::alphaBeta(Board& b, int alpha, int beta, int depthLeft, int depthGone, 
 		b.changeTurn();
 		b.unmovePiece();
 
-		if (score >= beta) { 
+		if (score >= beta) { //Fail-high
+			//If it wasn't a capture, update HH table and killer moves
 			if (b[mT] == none) {
 				hh[to64(mF)-1][to64(mT)-1] += depthGone*depthGone;
 			}
-		
+			//Transposition table storage, lower bound
 			storeTTEntry(b, mF * 100 + mT, depthLeft, beta, 1);
 
 			return beta;
 		}
-		if (score > alpha) { 
+		if (score > alpha) { //Best so far
 			alpha = score;
 			foundPV = true;
-		
+			//Add the move to the principal variation
 			pline->move[0] = mF*100 + mT;
 			memcpy(pline->move + 1, line.move, line.count * sizeof(int));
 			pline->count = line.count + 1;
 
+			//Transposition table storage, exact score
 			storeTTEntry(b, mF * 100 + mT, depthLeft, score, 0);
 		}
 		else {
@@ -415,31 +449,38 @@ int Bot::quies(Board& b, int alpha, int beta, int depthGone) {
 
 	bool s = b.getSide();
 
+	//If our king is dead, return a bad score
 	if ((s && !b.piece[wK].getAlive()) || (!s && !b.piece[bK].getAlive()))
 		return -CHECKMATE_VAL + depthGone-1;
 
 	int currEval = b.eval();
 	int score, mF, mT;
-
+	
+	//If standing pat is too good
 	if (currEval >= beta) {
 		return beta;
 	}
-	
+	//If standing pat is the best option
 	if (currEval > alpha)
 		alpha = currEval;
 
 	vector<int> nonQuiesList;
 
+	//Get psuedo-legal captures
 	b.generateCaptures(s, nonQuiesList);
 
+	//Order the captures by MVVLVA
 	b.sortCaptures(nonQuiesList);
 
+	//Add promotions to start
 	b.addPromotions(s, nonQuiesList);
 	
+	//Loop through the captures/promotions
 	for (size_t i = 0; i < nonQuiesList.size(); i++) {
 		mF = nonQuiesList[i]/100;
 		mT = nonQuiesList[i]%100;
 
+		//Futility (AKA delta) pruning
 		if (b.getWhiteMaterial() > ENDGAME_VAL && b.getBlackMaterial() > ENDGAME_VAL)
 			if (b[mT] != none && b.piece[b[mT]].getValue() + 1.2*P_VAL + currEval <= alpha)
 				if (!b.inCheck(s)) 
@@ -450,6 +491,7 @@ int Bot::quies(Board& b, int alpha, int beta, int depthGone) {
 		b.setMove(mF, mT);
 		b.movePiece();
 
+		//If we are in check, keep searching
 		if (b.inCheck(s)) {
 			b.unmovePiece();
 			continue;
@@ -461,10 +503,10 @@ int Bot::quies(Board& b, int alpha, int beta, int depthGone) {
 		b.unmovePiece();
 		b.changeTurn();
 
-		if (score >= beta) {
+		if (score >= beta) { //Fail-high
 			return beta;
 		}
-		if (score > alpha) { 
+		if (score > alpha) { //Best so far
 			alpha = score;
 		}
 		else {
