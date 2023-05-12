@@ -112,6 +112,7 @@ Cờ vua, đôi khi còn được gọi là cờ phương Tây hoặc cờ quố
 - Thiết lập một trường cơ sở dữ liệu (database) lưu trữ trên máy chủ (server) lưu trữ thông tin người chơi.
 - Xây dựng website để mọi người có thể truy cập và chơi cờ với nhau.
 - Tổ chức các giải đấu cờ nhằm xây dựng cộng đồng chơi cờ vua.
+- Xây dựng game 3D, thêm chức năng video thể hiện trận chiến giữa các quân cờ.
 
 <em style = "font-size: 15px"> Cải tiến thuật toán AI </em>
 - Cải tiến model Reinforcement Learning nhằm đưa Bot chess lên tầm cao mới, trở thành đối thủ hoàn hảo
